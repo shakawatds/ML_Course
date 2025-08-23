@@ -406,7 +406,24 @@ double GetLastEntryPriceDir(long dirType)
 bool ATRFilterOk()
 {
     if(!UseATRFilter) return true;
-    double atr = iATR(_Symbol, PERIOD_CURRENT, ATRPeriod, 0);
+    
+    // Create ATR handle
+    int atr_handle = iATR(_Symbol, PERIOD_CURRENT, ATRPeriod);
+    if(atr_handle == INVALID_HANDLE) 
+    {
+        Print("Failed to create ATR handle");
+        return true; // Allow trading if ATR fails
+    }
+    
+    // Get ATR value
+    double atr_buffer[1];
+    if(CopyBuffer(atr_handle, 0, 0, 1, atr_buffer) <= 0)
+    {
+        Print("Failed to copy ATR buffer");
+        return true; // Allow trading if ATR fails
+    }
+    
+    double atr = atr_buffer[0];
     double threshold = ATRMultiplier * atr;
     double priceRange = iHigh(_Symbol, PERIOD_CURRENT, 0) - iLow(_Symbol, PERIOD_CURRENT, 0);
 
